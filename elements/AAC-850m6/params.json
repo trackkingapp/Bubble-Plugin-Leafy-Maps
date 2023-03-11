@@ -1,11 +1,12 @@
 {
     "add_is_visible": true,
+    "can_fit_height": false,
     "category": "visual elements",
     "default_dim": {
         "height": 300,
         "width": 400
     },
-    "display": "Leafy map",
+    "display": "Leafy map - TK",
     "events": {
         "ACo": {
             "caption": "Location found",
@@ -17,6 +18,7 @@
         },
         "ADQ": {
             "caption": "Marker clicked",
+            "doc": "",
             "name": "marker_clicked"
         },
         "AGH": {
@@ -86,6 +88,14 @@
             "editor": "Label",
             "name": "a",
             "rank": 0
+        },
+        "AOD": {
+            "caption": "routegeojson",
+            "editor": "DynamicValue",
+            "is_list": false,
+            "name": "routegeojson",
+            "rank": 1,
+            "value": "file"
         }
     },
     "icon": "ion-android-map",
@@ -581,6 +591,22 @@
             "is_list": true,
             "name": "cluster_clicked_marker_ids",
             "value": "text"
+        },
+        "AOB": {
+            "caption": "Marker clicked latitude",
+            "initialization_code": {
+                "fn": "function(properties, context) {\n\n\n\n}"
+            },
+            "name": "marker_clicked_lat",
+            "value": "number"
+        },
+        "AOC": {
+            "caption": "Marker clicked longitude",
+            "initialization_code": {
+                "fn": "function(properties, context) {\n\n\n\n}"
+            },
+            "name": "marker_clicked_lng",
+            "value": "number"
         }
     }
 }

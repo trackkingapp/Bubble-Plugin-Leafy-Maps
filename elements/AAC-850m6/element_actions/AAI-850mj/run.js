@@ -49,8 +49,8 @@ function(instance, properties, context) {
 
         let myIcon = L.icon({
             iconUrl: `https:${properties.custom_icon_url}`,
-            iconSize:     [64, 64], // size of the icon
-            shadowSize:   [50, 64], // size of the shadow
+            iconSize:     [50, 60], // size of the icon
+            shadowSize:   [54, 64], // size of the shadow
             iconAnchor:   [32, 64], // point of the icon which will correspond to marker's location
             shadowAnchor: [4, 62],  // the same for the shadow
             popupAnchor: [0, -64]   // point from which the popup should open relative to the iconAnchor
@@ -78,10 +78,14 @@ function(instance, properties, context) {
     // publishes the unique name of the marker when it's clicked and triggers the 'marker clicked workflow'
     // if the unique marker name is not set then the 'marker clicked workflow' isn't triggered
     function markerClicked() {
+
         if(properties.marker_name) {
-            instance.publishState("marker_clicked_id", properties.marker_name);          
-            instance.triggerEvent("marker_clicked");
+            instance.publishState("marker_clicked_id", properties.marker_name); 
+            instance.publishState("marker_clicked_lat", properties.latitude);
+            instance.publishState("marker_clicked_lng", properties.longitude);
+             instance.triggerEvent("marker_clicked");
         }
+       
     }
 
     function markerHovered() {

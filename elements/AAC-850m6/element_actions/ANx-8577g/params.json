@@ -1,0 +1,14 @@
+{
+    "caption": "Overlay Image",
+    "doc": "",
+    "fields": {
+        "ANy": {
+            "caption": "image",
+            "editor": "DynamicValue",
+            "name": "image",
+            "optional": true,
+            "rank": 0,
+            "value": "image"
+        }
+    }
+}

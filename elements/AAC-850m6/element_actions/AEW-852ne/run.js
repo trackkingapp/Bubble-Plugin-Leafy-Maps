@@ -14,7 +14,7 @@ function(instance, properties, context) {
 
             zoomToBoundsOnClick: true,
             showCoverageOnHover: true,
-            spiderfyOnMaxZoom: false,
+            spiderfyOnMaxZoom: properties.spiderify,
             disableClusteringAtZoom: properties.max_zoom,
 
         };
@@ -41,6 +41,146 @@ function(instance, properties, context) {
         instance.publishState("marker_clicked_index", numberOfThisIndex);
 
         instance.triggerEvent("marker_clicked");
+        
+        // - NOUFEL EDITING HERE
+        
+        console.log(properties.routegeojson);
+         fetch(properties.routegeojson).then((response) => response.json()).then((json) => {
+             
+             
+              var firstpoint;
+            var firstpointnear;
+            var secondpoint;
+            var secondpointnear;
+            var pathfinderkeys;
+      
+              pathFinder = new geojsonPathFinder(json, {precision: 0.00001,   weight: function (a, b, props) {
+        const dx = a[0] - b[0];
+        const dy = a[1] - b[1];
+        return Math.sqrt(dx * dx + dy * dy);
+      }});
+      
+          
+            pathfinderkeys = Object.keys(pathFinder._graph.vertices);
+            pathvertices = {
+              "type": "FeatureCollection",
+              "features": []
+            };
+            
+            pathfinderkeys.forEach((element) => {
+              coords = element.split(',');
+              pathvertices.features.push( {
+                  "type": "Feature",
+                  "properties": {},
+                  "geometry": {
+                    "coordinates": [
+                      parseFloat(coords[0]),
+                      parseFloat(coords[1])
+                    ],
+                    "type": "Point"
+                  }
+                });
+            });
+             
+             
+             function findpath(firstpoint, firstpointnear, secondpoint, secondpointnear) {
+            
+            path = pathFinder.findPath(firstpointnear, secondpointnear);
+            console.log(path);
+            
+            
+            function polystyle(feature) {
+                return {
+                    fillColor: '#6FF2A4',
+                    weight: 6,
+                    opacity: 1,
+                    color: '#6FF2A4',  //Outline color
+                    fillOpacity: 0.7,
+                    dashArray: '15,15',
+                    lineCap: 'round',
+                    lineJoin: 'round'
+                };
+            }
+            
+            bearings = [];
+            bearings1 = [];
+            
+            L.geoJSON(  {
+                  "type": "Feature",
+                  "properties": {},
+                  "geometry": {
+                    "coordinates":path.path,
+                    "type": "LineString"
+                  }
+                }, {style: polystyle}).addTo(instance.data.mymap);
+                instance.data.mymap.invalidateSize();
+                //map.fitBounds();
+            
+                for (let i = 0; i < path.path.length; i++) {
+                    if (i !== path.path.length - 1) {
+            point1 = turf.point(path.path[i]);
+            point2 = turf.point(path.path[i+1]);
+            bearing = turf.bearing(point1, point2, {final: true});
+            bearings.push(bearing);
+                    }
+                }
+            console.log(bearings);
+            
+            for (let i = 0; i < bearings.length; i++) {
+                if (i !== 0) {
+                    if (bearings[i] - bearings[i-1] <0) {bearingo = (360 - (Math.abs(bearings[i] - bearings[i-1])))} else {bearingo = bearings[i] - bearings[i-1]}
+                    bearings1.push(bearingo);
+                    if (bearingo >=60 && bearingo <=150) {
+            $('#directions').append('<div>Turn Right</div>');
+                    } else if (bearingo >=210 && bearingo <=300) {
+            $('#directions').append('<div>Turn Left</div>');
+                    }
+                } else {
+                    if (bearings[i] >=330 || bearings[i] <=30) {
+                    $('#directions').append('<div>Take the North route.</div>');
+                    } else if (bearings[i] >30 && bearings[i] <=150) {
+                    $('#directions').append('<div>Take the West route.</div>');
+                    } else if (bearings[i] >150 && bearings[i] <=210) {
+                    $('#directions').append('<div>Take the South route.</div>');
+                    }else if (bearings[i] >210 && bearings[i] <330) {
+                    $('#directions').append('<div>Take the East route.</div>');
+                    }
+                }
+            }
+            console.log(bearings1);
+            
+            }
+             
+              if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(showPosition);
+                  }
+                  function showPosition(position) {
+                    console.log(position);
+                        firstpoint = {
+                            "type": "Feature",
+                            "properties": {},
+                            "geometry": {
+                              "coordinates":[position.coords.longitude,position.coords.latitude],
+                              "type": "Point"
+                            }
+                          };
+                        firstpointnear = turf.nearestPoint(firstpoint, pathvertices);
+                        secondpoint =  {
+                            "type": "Feature",
+                            "properties": {},
+                            "geometry": {
+                              "coordinates":[e.target._latlng.lng, e.target._latlng.lat],
+                              "type": "Point"
+                            }
+                          };
+                        secondpointnear = turf.nearestPoint(secondpoint, pathvertices);
+                        findpath(firstpoint, firstpointnear, secondpoint, secondpointnear);
+                  }
+         });
+
+        
+        
+        //- NOUFEL STOPS HERE
 
     }
 
@@ -260,6 +400,49 @@ function(instance, properties, context) {
 
         instance.data[`markerCluster${properties.unique_name}`].addTo(instance.data.mymap);
     }
-
-
+    
+    // ----------------NOUFEL SCRIPT -----------------------------------------------
+    
+    //L.control.locate().addTo(instance.data.mymap);
+    
+      $('.leaflet-bottom.leaflet-left').append(`
+  <div class="leaflet-pm-toolbar leaflet-pm-edit leaflet-bar leaflet-control">
+    <div class="button-container  " title="Your Location" id="loc-btn">
+        <a class="leaflet-buttons-control-button" role="button" tabindex="0" href="#">
+            <div class="control-icon" style="background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAkCAYAAACTz/ouAAAACXBIWXMAAAsTAAALEwEAmpwYAAACEklEQVRIia3WT4iNURjH8c/cKMWkTIQsRCMilEnNpEyJDRsplJCVRGyspLBgqWzZ2Ch/ykI0UeTfRtFMRkKxYBai/JkRjcZci/e+dXvnPed935n7q2dxz3me7+855z63c9vEtQC70IsV6Gisf8MbPMI1DBVwJqgDV1AvGdcxryx8ZwVwNvYWwY9PAZ7GyRD8QAvgaRzOwpdhrIUGdaxuNrjaYngdt6BNMn6vQ/fWpF8YwDjWYHaJmi44UdDJKA7mFO/HSEHtObgbSRhBZ6TDRfgSqX8CHyIJu0tcw7ZI/Uf4Gdh8WwKe6nmAMVzD30DRiwoG/YH10ZrkivI0XsHgX2D9XQ2PA5srKxiEcvugR/hL2lwC3h2pX5ImPQ0kvEd7BD4dLwO1l5oTd0S6GMKGHPi6RgN5NWNYmi24HzGpY7DR1UXJ1MRyT+cdt6ugqGwM5MFTnW2BQU/MQInjV76arNZOEv6wDDzVoYrwH1hYxQAuVzDYWhVO8toNloCfmQw8VSf+ROA3pgJP1RuA90tOGVUtsteN25If4LHM3hBO4Z7k38PGKh3PkYxcc7d7cL7p83YTh+AZ5hfBZ8h/o79jCz7jAo7k5NTxCbNiBqHCtMPF2BfJqctc57SMwUjEfD2OYnmswwIGuFPQYSz6iuCpTkoe8rLgcclUTVBsjtsl07IJqzAXMxt7v/EVr/AANzGcB/kPnMuxXk7zfbsAAAAASUVORK5CYII=)"></div>
+            </a>
+                </div>
+    `);
+    
+    document.getElementById("loc-btn").addEventListener("click", function(){
+    if (navigator.geolocation) {
+                  navigator.geolocation.getCurrentPosition(showPosition);
+                }
+        function showPosition(position) {
+            userlocationmarker = {
+                          "type": "Feature",
+                          "properties": {},
+                          "geometry": {
+                            "coordinates":[position.coords.longitude,position.coords.latitude],
+                            "type": "Point"
+                          }
+                        };
+          userlocationmarkerstyle = {
+    radius: 6,
+    fillColor: "#001dff",
+    color: "#fff",
+    weight: 2,
+    opacity: 1,
+    fillOpacity: 0.8
+};
+            L.geoJSON(userlocationmarker, {
+    pointToLayer: function (feature, latlng) {
+        return L.circleMarker(latlng, userlocationmarkerstyle);
+    }
+    }).addTo(instance.data.mymap);
+            instance.data.mymap.setView([position.coords.latitude, position.coords.longitude], 18);
+            
+        }
+}, false);
+    //-------------------------- NOUFEL SCRIPT ENDS ----------------------------
 }

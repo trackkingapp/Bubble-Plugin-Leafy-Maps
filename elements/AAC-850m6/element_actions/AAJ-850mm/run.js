@@ -39,7 +39,11 @@ function(instance, properties, context) {
     document.head.insertAdjacentElement('beforeend', instance.data.custom_style);
     let mymap = L.map(mapid).setView([properties.initial_view_latitude, properties.initial_view_longitude], properties.zoom_level);
     instance.data.mymap = mymap;
+    mymap.setMaxBounds([[27.458616, -81.364361], [27.44605338985495, -81.34535867539368 ]]);
+    mymap.setMaxZoom(18);
+    mymap.setMinZoom(15);
 
+    
     if (properties.tile_provider === "Mapbox") {
 
 
@@ -119,7 +123,7 @@ function(instance, properties, context) {
 
         L.mapboxGL({
             attribution: "\u003ca href=\"https://www.maptiler.com/copyright/\" target=\"_blank\"\u003e\u0026copy; MapTiler\u003c/a\u003e \u003ca href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\"\u003e\u0026copy; OpenStreetMap contributors\u003c/a\u003e",
-            style: `https://api.maptiler.com/maps/${tileName}/style.json?key=${context.keys[`Maptiler access token`]}`
+            style: `https://api.maptiler.com/maps/${tileName}/style.json?key=${context.keys[`Maptiler access token`]}`,
         }).addTo(instance.data.mymap);
 
         if (properties.display_maptiler_logo === true) {
@@ -1535,7 +1539,6 @@ function(instance, properties, context) {
             instance.triggerEvent("map_clicked");
         });
     }
-
 
 
 

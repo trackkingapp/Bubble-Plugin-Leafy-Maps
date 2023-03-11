@@ -1,0 +1,23 @@
+{
+    "caption": "Overlay SVG",
+    "fields": {
+        "ANv": {
+            "caption": "SVG",
+            "doc": "Insert SVG code here",
+            "editor": "DynamicValue",
+            "long_text": true,
+            "name": "svg",
+            "optional": true,
+            "rank": 0,
+            "value": "text"
+        },
+        "ANw": {
+            "caption": "SVG bounds",
+            "editor": "DynamicValue",
+            "name": "svg_bounds",
+            "optional": true,
+            "rank": 1,
+            "value": "text"
+        }
+    }
+}
